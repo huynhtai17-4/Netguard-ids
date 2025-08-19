@@ -1,9 +1,23 @@
+# Network packet capture & analysis
 scapy==2.5.0
 pyshark==0.6.0
+
+# Data processing
 pandas==1.5.3
 numpy==1.24.4
+
+# Machine Learning
 scikit-learn==1.3.2
+
+# Web dashboard
 flask==2.2.5
+sqlalchemy==2.0.31   # ORM để lưu dữ liệu nếu cần
+jinja2==3.1.3        # Template engine (Flask phụ thuộc)
+
+# Config & utilities
 pyyaml==6.0.1
 requests==2.32.3
 
+# (Optional) Security & logging
+python-dotenv==1.0.1  # Đọc .env
+loguru==0.7.2         # Logging dễ dùng
