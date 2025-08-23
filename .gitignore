@@ -1,20 +1,14 @@
-### Python ###
-# Virtual environment
-venv/
-.env/
-.venv/
-venv*/
-env/
-pip-selfcheck.json
+# ==============================
+# NetGuard IDS .gitignore
+# ==============================
 
-# Byte-compiled files
+# ========== Python ==========
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.py.class
-
-# Distribution / packaging
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
 develop-eggs/
 dist/
@@ -27,80 +21,74 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+# ========== Virtual Environments ==========
+# Virtualenv and similar environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# ========== IDE ==========
+# PyCharm
+.idea/
+*.swp
+*.swo
+*~
 
-### IDE ###
 # VS Code
 .vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+*.code-workspace
 
-# PyCharm
-.idea/
-*.iml
-*.ipr
-*.iws
+# ========== Environment Variables ==========
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.secrets
 
-# Eclipse
-.settings/
-.pydevproject
-.project
+# ========== Database ==========
+# SQLite files
+*.sqlite
+*.sqlite3
+*.db
 
-# Sublime Text
-*.sublime-*
+# Database migrations (except Alembic structure)
+storage/migrations/versions/*.py
+!storage/migrations/versions/__init__.py
 
-### Data & Models ###
-# Local datasets
-storage/datasets/*
-
-# Model files (except manifest)
+# ========== Machine Learning Models ==========
+# Trained models and datasets
 storage/models/*.pkl
 storage/models/*.h5
 storage/models/*.joblib
 storage/models/*.pt
-!storage/models/manifest.json
+storage/models/*.onnx
+storage/datasets/*.csv
+storage/datasets/*.parquet
 
-# Database files
-*.db
-*.sqlite
-*.sqlite3
+# ========== Logs ==========
+# Log files
+*.log
+logs/
+*.logs
 
-### Configuration & Secrets ###
-# Environment variables
-.env
-.env.*
-!.env.template
-!.env.example
-
-# Secret configs
-config/secrets/*.env
-!config/secrets/.env.*.template
-
-# Local config overrides
-config/local_*.yaml
-
-### OS & Miscellaneous ###
-# OS generated files
+# ========== OS Generated Files ==========
+# macOS
 .DS_Store
 .DS_Store?
 ._*
@@ -109,28 +97,43 @@ config/local_*.yaml
 ehthumbs.db
 Thumbs.db
 
-# Log files
-*.log
-*.log.*
-logs/
+# Windows
+Thumbs.db
 
-# Temp files
-*.tmp
-*.bak
-*.swp
-*~
-
-# Docker compose override
+# ========== Docker ==========
+# Docker
 docker-compose.override.yml
 
-### Build artifacts ###
-# Docker build context
-.dockerignore
+# ========== Testing ==========
+# Test outputs
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+test-results.xml
 
-# Compression artifacts
-*.gz
-*.zip
-*.tar
+# ========== Package Management ==========
+# Pipfile
+Pipfile
+Pipfile.lock
 
-### MLFlow (if used) ###
-mlruns/
+# Poetry
+poetry.lock
+
+# ========== Documentation ==========
+# Sphinx
+docs/_build/
+
+# ========== Special Files ==========
+# Capabilities setup (should be generated)
+agent/capabilities_setup.sh
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# ========== Temporary Files ==========
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/

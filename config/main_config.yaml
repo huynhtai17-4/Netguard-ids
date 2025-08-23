@@ -1,0 +1,173 @@
+# ============================================
+# NetGuard IDS Main Configuration
+# ============================================
+# Cấu hình tổng thể cho hệ thống NetGuard IDS
+# ============================================
+
+# ========== AGENT CONFIGURATION ==========
+agent:
+  # Cấu hình capture gói tin
+  capture:
+    interface: "eth0"                 # Interface mạng để bắt gói tin (hoặc "any")
+    buffer_size: 1024                 # Kích thước buffer capture (KB)
+    snapshot_length: 65535            # Độ dài tối đa của mỗi gói tin
+    timeout: 1000                     # Timeout capture (ms)
+    promiscuous: true                 # Chế độ promiscuous mode
+    bpf_filter: "tcp or udp or icmp"  # BPF filter cho capture
+
+  # Cấu hình flow generation
+  flow_generation:
+    active_timeout: 300               # Timeout cho flow đang active (giây)
+    inactive_timeout: 15              # Timeout cho flow inactive (giây)
+    check_interval: 10                # Interval kiểm tra flow (giây)
+
+# ========== PREPROCESSOR CONFIGURATION ==========
+preprocessor:
+  # Các features sẽ được trích xuất từ flow
+  features:
+    - duration
+    - protocol
+    - src_bytes
+    - dst_bytes
+    - src_packets
+    - dst_packets
+    - src_ip_count
+    - dst_ip_count
+    - tcp_flags
+    - packet_size_stats
+
+  # Cấu hình chuẩn hóa dữ liệu
+  normalization:
+    method: "minmax"                  # minmax, standard, robust
+    feature_range: [0, 1]             # Range cho minmax scaling
+    save_normalizer: true             # Lưu normalizer để sử dụng sau
+
+# ========== DETECTOR CONFIGURATION ==========
+detector:
+  # Cấu hình rule-based detection
+  rule_engine:
+    rules_path: "detector/rules"      # Đường dẫn đến thư mục rules
+    update_interval: 3600             # Interval cập nhật rules (giây)
+    enabled: true                     # Bật/tắt rule engine
+
+  # Cấu hình ML-based detection
+  ml_engine:
+    model_path: "storage/models/isolation_forest_v1.pkl"
+    confidence_threshold: 0.85        # Ngưỡng confidence để xác định anomaly
+    update_interval: 86400            # Interval cập nhật model (giây)
+    enabled: true
+
+  # Cấu hình thresholds cho detection
+  thresholds:
+    port_scan:
+      max_ports_per_host: 20          # Số port tối đa từ một host
+      time_window: 60                 # Cửa sổ thời gian (giây)
+    
+    ssh_bruteforce:
+      max_attempts: 5                 # Số attempt đăng nhập tối đa
+      time_window: 300                # Cửa sổ thời gian (giây)
+    
+    dos_attack:
+      max_packets_per_second: 1000    # Số packets tối đa mỗi giây
+      time_window: 10                 # Cửa sổ thời gian (giây)
+
+# ========== RESPONDER CONFIGURATION ==========
+responder:
+  # Cấu hình alerting
+  alerting:
+    email:
+      enabled: false
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "alert@example.com"
+      password: "your_password"
+      recipients: ["admin@example.com"]
+    
+    slack:
+      enabled: false
+      webhook_url: "https://hooks.slack.com/services/XXX/XXX/XXX"
+      channel: "#alerts"
+    
+    console:
+      enabled: true                   # Hiển thị alert trên console
+
+  # Cấu hình blocking
+  blocking:
+    iptables:
+      enabled: false                  # Bật/tắt blocking bằng iptables
+      chain: "NETGUARD_BLOCK"         # Chain iptables tùy chỉnh
+      block_duration: 3600            # Thời gian block (giây)
+
+# ========== DASHBOARD CONFIGURATION ==========
+dashboard:
+  # Cấu hình server
+  server:
+    host: "0.0.0.0"                   # Host address
+    port: 5000                        # Port
+    debug: true                      # Chế độ debug
+    secret_key: "your-secret-key"     # Secret key cho session
+
+  # Cấu hình database
+  database:
+    connection_string: "sqlite:///storage/netguard.db"
+    pool_size: 20                     # Kích thước connection pool
+    max_overflow: 40                  # Max overflow connections
+
+  # Cấu hình authentication
+  auth:
+    jwt_secret: "your-jwt-secret"     # JWT secret key
+    token_expiration: 86400           # Thời gian hết hạn token (giây)
+
+  # Cấu hình real-time updates
+  realtime:
+    enabled: true
+    ping_interval: 25                 # WebSocket ping interval (giây)
+    ping_timeout: 5                   # WebSocket ping timeout (giây)
+
+# ========== LOGGING CONFIGURATION ==========
+logging:
+  level: "INFO"                       # Log level: DEBUG, INFO, WARNING, ERROR
+  file_path: "logs/netguard.log"      # Đường dẫn file log
+  max_size: 10485760                  # Kích thước tối đa file log (bytes)
+  backup_count: 5                     # Số file log backup
+  json_format: false                  # Định dạng JSON cho log
+
+# ========== OBSERVABILITY CONFIGURATION ==========
+observability:
+  # Cấu hình metrics Prometheus
+  metrics:
+    enabled: true
+    port: 9090                        # Port cho metrics endpoint
+    update_interval: 15               # Interval cập nhật metrics (giây)
+
+  # Cấu hình health checks
+  health_check:
+    enabled: true
+    port: 8080                        # Port cho health check endpoint
+    check_interval: 30                # Interval kiểm tra health (giây)
+
+# ========== ADVANCED CONFIGURATION ==========
+advanced:
+  # Cấu hình performance
+  performance:
+    max_threads: 10                   # Số thread tối đa
+    queue_size: 1000                  # Kích thước queue
+    batch_size: 100                   # Kích thước batch xử lý
+
+  # Cấu hình data retention
+  data_retention:
+    alert_days: 30                    # Số ngày lưu trữ alerts
+    flow_days: 7                      # Số ngày lưu trữ flows
+    packet_days: 1                    # Số ngày lưu trữ packets
+
+  # Cấu hình external integrations
+  integrations:
+    virustotal:
+      enabled: false
+      api_key: "your-virustotal-api-key"
+      timeout: 10                     # Timeout request (giây)
+    
+    abuseipdb:
+      enabled: false
+      api_key: "your-abuseipdb-api-key"
+      timeout: 10                     # Timeout request (giây)

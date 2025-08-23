@@ -1,0 +1,201 @@
+# ============================================
+# NetGuard IDS Detector Configuration
+# ============================================
+# Cấu hình chuyên sâu cho module phát hiện xâm nhập
+# ============================================
+
+# ========== RULE ENGINE CONFIGURATION ==========
+rule_engine:
+  # Đường dẫn đến các file rules
+  rules_path: "detector/rules"
+  
+  # File rules mặc định
+  default_rules: "default_rules.yaml"
+  
+  # Các file rules bổ sung (load theo thứ tự)
+  additional_rules:
+    - "scan_detection.yaml"
+    - "bruteforce_detection.yaml"
+    - "dos_detection.yaml"
+  
+  # Tần suất reload rules (giây)
+  reload_interval: 3600
+  
+  # Kích hoạt rule engine
+  enabled: true
+  
+  # Ưu tiên rule engine (cao hơn = ưu tiên hơn)
+  priority: 100
+
+# ========== ML ENGINE CONFIGURATION ==========
+ml_engine:
+  # Đường dẫn đến thư mục models
+  models_dir: "storage/models"
+  
+  # Model mặc định
+  default_model: "isolation_forest_v1.pkl"
+  
+  # Model backup (nếu default model không tồn tại)
+  fallback_model: "isolation_forest_backup.pkl"
+  
+  # Model manifest file
+  manifest_file: "manifest.json"
+  
+  # Ngưỡng confidence để xác định anomaly (0.0-1.0)
+  confidence_threshold: 0.85
+  
+  # Tần suất kiểm tra model mới (giây)
+  model_check_interval: 86400
+  
+  # Kích hoạt ML engine
+  enabled: true
+  
+  # Ưu tiên ML engine (thấp hơn rule engine)
+  priority: 50
+
+# ========== DETECTION THRESHOLDS ==========
+thresholds:
+  # Port scan detection
+  port_scan:
+    enabled: true
+    max_ports_per_host: 5          # Số port tối đa từ một host
+    time_window: 60                 # Cửa sổ thời gian (giây)
+    severity: "high"                # Mức độ nghiêm trọng
+    
+  # SSH bruteforce detection
+  ssh_bruteforce:
+    enabled: true
+    max_attempts: 3                 # Số lần thử đăng nhập tối đa
+    time_window: 300                # Cửa sổ thời gian (giây)
+    severity: "high"
+    
+  # DDoS detection
+  ddos:
+    enabled: true
+    max_packets_per_second: 1000    # Số packets tối đa mỗi giây
+    time_window: 10                 # Cửa sổ thời gian (giây)
+    severity: "critical"
+    
+  # Protocol anomaly detection
+  protocol_anomaly:
+    enabled: true
+    severity: "medium"
+    
+  # Data exfiltration detection
+  data_exfiltration:
+    enabled: true
+    max_bytes_per_minute: 10485760  # 10MB mỗi phút
+    time_window: 60                 # Cửa sổ thời gian (giây)
+    severity: "high"
+
+# ========== MODEL TRAINING CONFIGURATION ==========
+training:
+  # Đường dẫn đến datasets
+  datasets_dir: "storage/datasets"
+  
+  # Tập dữ liệu huấn luyện
+  training_dataset: "training_data.csv"
+  
+  # Tập dữ liệu validation
+  validation_dataset: "validation_data.csv"
+  
+  # Tập dữ liệu testing
+  testing_dataset: "testing_data.csv"
+  
+  # Tỷ lệ chia dữ liệu (train/validation/test)
+  split_ratio: 
+    train: 0.7
+    validation: 0.15
+    test: 0.15
+  
+  # Các features sử dụng cho training
+  features:
+    - duration
+    - protocol
+    - src_bytes
+    - dst_bytes
+    - src_packets
+    - dst_packets
+    - src_ip_count
+    - dst_ip_count
+    - tcp_flags
+    - packet_size_mean
+    - packet_size_std
+  
+  # Hyperparameters cho model
+  hyperparameters:
+    isolation_forest:
+      n_estimators: 100
+      max_samples: "auto"
+      contamination: 0.1
+      random_state: 42
+    random_forest:
+      n_estimators: 100
+      max_depth: 10
+      random_state: 42
+
+# ========== ORCHESTRATOR CONFIGURATION ==========
+orchestrator:
+  # Chiến lược kết hợp kết quả: majority, weighted, priority
+  combination_strategy: "priority"
+  
+  # Trọng số cho từng engine (nếu dùng weighted strategy)
+  weights:
+    rule_engine: 0.7
+    ml_engine: 0.3
+  
+  # Thời gian lưu trữ kết quả tạm thời (giây)
+  result_retention: 300
+  
+  # Kích hoạt ghi log chi tiết
+  verbose_logging: false
+
+# ========== PERFORMANCE CONFIGURATION ==========
+performance:
+  # Số luồng xử lý song song
+  max_workers: 4
+  
+  # Kích thước batch xử lý
+  batch_size: 100
+  
+  # Timeout xử lý (giây)
+  processing_timeout: 30
+  
+  # Giới hạn bộ nhớ sử dụng (MB)
+  memory_limit: 1024
+
+# ========== ALERT CONFIGURATION ==========
+alert:
+  # Mức độ nghiêm trọng tối thiểu để kích hoạt alert
+  min_severity: "medium"
+  
+  # Suppress trùng lặp alerts trong khoảng thời gian (giây)
+  suppression_window: 300
+  
+  # Nhóm alerts theo tiêu chí
+  grouping:
+    enabled: true
+    by_source_ip: true
+    by_destination_ip: true
+    by_alert_type: true
+
+# ========== ADVANCED CONFIGURATION ==========
+advanced:
+  # Whitelist IPs (bỏ qua detection)
+  whitelist:
+    - "192.168.1.1"    # Gateway
+    - "192.168.1.100"  # Server nội bộ
+    - "10.0.0.0/8"     # Mạng nội bộ
+  
+  # Blacklist IPs (luôn cảnh báo)
+  blacklist: []
+  
+  # Chế độ debug
+  debug: true
+  
+  # Ghi log dự đoán chi tiết
+  log_predictions: true
+  
+  # Lưu trữ dữ liệu dự đoán
+  save_prediction_data: false
+  prediction_data_path: "storage/predictions"
